@@ -27,16 +27,12 @@
 
 .flex {
   display: flex;
-  margin-right: 2rem;
   align-items: center;
-  &:last-child {
-    margin-right: unset;
-  }
 }
 
 .item {
   display: flex;
-  margin-right: 0.25rem;
+  margin-right: 2rem;
   &:last-child {
     margin-right: unset;
   }
@@ -55,4 +51,8 @@
 
 .time {
   font-size: 0.7rem;
+}
+
+.image {
+  margin-right: 0.25rem;
 }

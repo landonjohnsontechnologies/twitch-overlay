@@ -59,12 +59,14 @@ export default function Home() {
         {/* logo */}
         <div className={styles.flex}>
           <a className={styles.logo} href="https://ljtech.ca">
-            <Image
-              alt="logo"
-              src={`/logo-${colors[randomNum]}.svg`}
-              height={24}
-              width={24}
-            />
+            <span className={styles.image}>
+              <Image
+                alt="logo"
+                src={`/logo-${colors[randomNum]}.svg`}
+                height={24}
+                width={24}
+              />
+            </span>
             ljtech.ca
           </a>
           <div>
