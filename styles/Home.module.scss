@@ -27,13 +27,19 @@
 
 .flex {
   display: flex;
-  column-gap: 2rem;
+  margin-right: 2rem;
   align-items: center;
+  &:last-child {
+    margin-right: unset;
+  }
 }
 
 .item {
   display: flex;
-  column-gap: 0.25rem;
+  margin-right: 0.25rem;
+  &:last-child {
+    margin-right: unset;
+  }
   align-items: center;
 }
 
