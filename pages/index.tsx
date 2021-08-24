@@ -1,54 +1,162 @@
 import Head from "next/head";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { CommonUserstate } from "tmi.js";
 import { opts } from "../lib/data.js";
 import styles from "../styles/Home.module.scss";
 
 const tmi = require("tmi.js");
 
+interface Message {
+  text: string;
+  src: string;
+  img: HTMLImageElement;
+}
+
 export default function Home() {
   const [dateTime, setDateTime] = useState({ date: "", time: "" });
+  const chatRef = useRef<HTMLUListElement>(null);
+  const [stream, setStream] = useState<{
+    id: number;
+    followers: any;
+  }>({
+    id: 0,
+    followers: {},
+  });
 
   useEffect(() => {
+    const fetchFollowerData = async () => {
+      const followers = await fetch(
+        `https://api.twitch.tv/helix/users/follows?to_id=605732264`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: "Bearer 09qsq8nliw5kq12eneni72vicahtlg",
+            "Client-Id": "sxj0zfm4ts94sit4qp9380grqcqrwt",
+          },
+        }
+      );
+      const followersData = await followers.json();
+      setStream((previousState) => ({
+        ...previousState,
+        followers: followersData,
+      }));
+    };
+
+    fetchFollowerData();
+
     const client = new tmi.client(opts);
-
-    client.on("message", onMessageHandler);
-    client.on("connected", onConnectedHandler);
-
     client.connect();
 
+    client.on("connected", onConnectedHandler);
+    function onConnectedHandler(addr: string, port: string) {
+      console.log(`* Connected to ${addr}:${port}`);
+    }
+
+    client.on("message", onMessageHandler);
     function onMessageHandler(
       target: string,
       context: CommonUserstate,
       msg: string,
-      self: any
+      self: boolean
     ) {
+      console.log("self", self);
       if (self) {
         return;
       }
-      const commandName = msg.trim();
 
-      if (commandName === "!dice") {
+      const displayName = context["display-name"];
+      const message = msg.trim();
+
+      // commands
+      if (message === "!dice") {
         const num = rollDice();
         client.say(target, `${Math.floor(num)}`);
-        console.log(`* Executed ${commandName} command`);
+        console.log(`* Executed ${message} command`);
       } else {
-        const username = context.username;
+        const stringReplacements: Message[] = [];
+        if (context.emotes) {
+          Object.entries(context.emotes).forEach(([id, positions]) => {
+            const position = positions[0];
+            const [start, end] = position.split("-");
+            const stringToReplace = message.substring(
+              parseInt(start, 10),
+              parseInt(end, 10) + 1
+            );
 
-        console.log(`${username}: ${commandName}`);
+            let imgSrc = `https://static-cdn.jtvnw.net/emoticons/v1/${id}/3.0`;
+
+            let imgElement = document.createElement("img");
+            imgElement.classList.add("emoji");
+            imgElement.src = imgSrc;
+            imgElement.alt = stringToReplace;
+            imgElement.width = 28;
+            imgElement.height = 28;
+
+            stringReplacements.push({
+              text: stringToReplace,
+              src: imgSrc,
+              img: imgElement,
+            });
+          });
+        }
+
+        let splitArray: Array<any> = message.split(" ");
+
+        for (let i = 0; i < splitArray.length; i++) {
+          if (
+            stringReplacements.some(
+              (messageObject) => messageObject.text === splitArray[i]
+            )
+          ) {
+            splitArray[i] = stringReplacements.find(
+              (stringReplacement) => stringReplacement.text === splitArray[i]
+            )?.img as HTMLImageElement;
+          } else if (i !== splitArray.length - 1) {
+            splitArray[i] = document.createTextNode(
+              (splitArray[i] as string) + " "
+            );
+          } else {
+            splitArray[i] = document.createTextNode(splitArray[i] as string);
+          }
+        }
+
+        let messageArray: Array<any> = splitArray;
+        let chat = chatRef.current as HTMLUListElement;
+        let chatItem = document.createElement("li");
+        let chatUser = document.createElement("span");
+        let chatContent = document.createElement("span");
+
+        messageArray.forEach((word) => chatContent.appendChild(word));
+        chatItem.classList.add("message");
+
+        chatUser.appendChild(document.createTextNode(displayName + ": "));
+        chatUser.classList.add("name");
+        if (context.color) {
+          chatUser.style.color = context.color as string;
+        } else {
+          chatUser.classList.add("rainbow");
+        }
+
+        chatContent.classList.add("content");
+
+        chatItem.appendChild(chatUser);
+        chatItem.appendChild(chatContent);
+        chat.appendChild(chatItem);
+        if (chat.childNodes.length > 10) {
+          chat.childNodes[0].remove();
+        }
+        chatItem.scrollIntoView({ behavior: "smooth", block: "end" });
       }
     }
 
+    // todo: create some more commands
     function rollDice() {
       const sides = 6;
       return Math.floor(Math.random() * sides) + 1;
     }
 
-    function onConnectedHandler(addr: string, port: string) {
-      console.log(`* Connected to ${addr}:${port}`);
-    }
-
+    // bottom left date and time
     function renderDateTime(now: number) {
       setDateTime({
         date: new Date().toLocaleDateString(),
@@ -58,6 +166,10 @@ export default function Home() {
     }
     requestAnimationFrame(renderDateTime);
   }, []);
+
+  useEffect(() => {
+    console.log(stream);
+  }, [stream]);
 
   return (
     <div className={styles.container}>
@@ -69,6 +181,8 @@ export default function Home() {
         />
         <link rel="icon" href="/favicon.ico" />
       </Head>
+
+      <ul className={styles.chat} ref={chatRef}></ul>
       <footer className={styles.footer}>
         <div className={styles.flex}>
           <a className={styles.logo} href="https://ljtech.ca">
@@ -81,6 +195,12 @@ export default function Home() {
             <div className={styles.time}>{dateTime.time}</div>
             <div className={styles.date}>{dateTime.date}</div>
           </div>
+          {/* <div>
+            {Math.floor((stream.followers.total + 1000) / 1000) * 1000 -
+              stream.followers.total}
+            followers till{" "}
+            {Math.floor((stream.followers.total + 1000) / 1000) * 1000}
+          </div> */}
         </div>
       </footer>
     </div>
