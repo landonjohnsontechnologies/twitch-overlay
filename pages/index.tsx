@@ -14,8 +14,8 @@ interface Message {
 }
 
 export default function Home() {
-  const [dateTime, setDateTime] = useState({ date: "", time: "" });
   const chatRef = useRef<HTMLUListElement>(null);
+  const [dateTime, setDateTime] = useState({ date: "", time: "" });
   const [stream, setStream] = useState<{
     id: number;
     followers: any;
@@ -24,6 +24,7 @@ export default function Home() {
     followers: {},
   });
 
+  // todo: bearer token is public lol woopsie
   useEffect(() => {
     const fetchFollowerData = async () => {
       const followers = await fetch(
@@ -167,10 +168,6 @@ export default function Home() {
     requestAnimationFrame(renderDateTime);
   }, []);
 
-  useEffect(() => {
-    console.log(stream);
-  }, [stream]);
-
   return (
     <div className={styles.container}>
       <Head>
@@ -184,23 +181,37 @@ export default function Home() {
 
       <ul className={styles.chat} ref={chatRef}></ul>
       <footer className={styles.footer}>
-        <div className={styles.flex}>
-          <a className={styles.logo} href="https://ljtech.ca">
-            <span className={styles.image}>
-              <Image alt="logo" src="/ljtech.svg" height={24} width={24} />
-            </span>
-            ljtech.ca
-          </a>
-          <div>
-            <div className={styles.time}>{dateTime.time}</div>
-            <div className={styles.date}>{dateTime.date}</div>
+        <div className={styles.root}>
+          <div className={styles.flex}>
+            <a className={styles.logo} href="https://ljtech.ca">
+              <span className={styles.image}>
+                <Image alt="logo" src="/ljtech.svg" height={24} width={24} />
+              </span>
+              ljtech.ca
+            </a>
+            <div>
+              <div className={styles.time}>{dateTime.time}</div>
+              <div className={styles.date}>{dateTime.date}</div>
+            </div>
           </div>
-          {/* <div>
-            {Math.floor((stream.followers.total + 1000) / 1000) * 1000 -
-              stream.followers.total}
-            followers till{" "}
-            {Math.floor((stream.followers.total + 1000) / 1000) * 1000}
-          </div> */}
+          <div className={styles.end}>
+            <div>follower goal:</div>
+            <div className={styles.progress}>
+              <div
+                className={styles.filled}
+                style={{
+                  width: `${
+                    stream.followers.total /
+                    Math.ceil(stream.followers.total / 100)
+                  }%`,
+                }}
+              >
+                {stream.followers.total}
+              </div>
+              <div className={styles.empty}></div>
+            </div>
+            <div>{Math.ceil(stream.followers.total / 100) * 100}</div>
+          </div>
         </div>
       </footer>
     </div>
