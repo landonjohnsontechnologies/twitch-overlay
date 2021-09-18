@@ -1,0 +1,6 @@
+☐ just starting screen
+☐ afk screen
+
+// use this style
+background-color: rgba(255, 255, 255, 0.8);
+backdrop-filter: saturate(180%) blur(0.25rem);

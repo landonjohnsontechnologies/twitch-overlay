@@ -1,0 +1,176 @@
+.root {
+  position: relative;
+}
+
+.index {
+  position: relative;
+  z-index: 100;
+}
+
+.base {
+  left: 0;
+  top: 0;
+  position: absolute;
+  background-color: black;
+  height: 100vh;
+  width: 100vw;
+}
+
+.grid {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  font-size: 3vw;
+}
+
+.container {
+  margin: auto;
+}
+
+.title {
+  @extend .container;
+  white-space: nowrap;
+  font-weight: 800;
+  text-align: center;
+}
+
+.heading {
+  position: relative;
+}
+
+.blueTeal,
+.purplePink,
+.redYellow {
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 90;
+  position: absolute;
+}
+
+.blueTeal {
+  background: linear-gradient(92.97deg, var(--blue) 16%, var(--cyan) 84.37%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: blueCyan 60s ease infinite;
+  opacity: 1;
+}
+
+.purplePink {
+  background: linear-gradient(
+    91.54deg,
+    var(--purple) 22.93%,
+    var(--pink) 77.83%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: purplePink 60s ease infinite;
+  opacity: 1;
+}
+
+.redYellow {
+  background: linear-gradient(
+    91.19deg,
+    var(--red) 34.34%,
+    var(--yellow) 66.71%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: redYellow 60s ease infinite;
+  opacity: 1;
+}
+
+@keyframes blueCyan {
+  0% {
+    background: linear-gradient(110deg, #007cf0, #34d399);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    opacity: 0;
+  }
+  20% {
+    background: linear-gradient(110deg, #007cf0, #34d399);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    opacity: 1;
+  }
+  40% {
+    background: linear-gradient(110deg, #007cf0, #34d399);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    opacity: 0;
+  }
+  60% {
+    background: unset;
+    opacity: 0;
+  }
+  80% {
+    background: unset;
+    opacity: 0;
+  }
+  100% {
+    background: unset;
+    opacity: 0;
+  }
+}
+
+@keyframes purplePink {
+  0% {
+    background: unset;
+    opacity: 0;
+  }
+  25% {
+    background: linear-gradient(110deg, #4338ca, #f472b6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    opacity: 0;
+  }
+  50% {
+    background: linear-gradient(110deg, #4338ca, #f472b6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    opacity: 1;
+  }
+  75% {
+    background: linear-gradient(110deg, #4338ca, #f472b6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    opacity: 0;
+  }
+  100% {
+    background: unset;
+    opacity: 0;
+  }
+}
+
+@keyframes redYellow {
+  0% {
+    background: unset;
+    opacity: 0;
+  }
+  20% {
+    background: unset;
+    opacity: 0;
+  }
+  40% {
+    background: unset;
+    opacity: 0;
+  }
+  60% {
+    background: linear-gradient(110deg, #ef4444, #fde047);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    opacity: 0;
+  }
+  80% {
+    background: linear-gradient(110deg, #ef4444, #fde047);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    opacity: 1;
+  }
+  100% {
+    background: linear-gradient(110deg, #ef4444, #fde047);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    opacity: 0;
+  }
+}
