@@ -53,7 +53,7 @@ export default function Layout() {
       msg: string,
       self: boolean
     ) {
-      console.log(target, context, msg, self);
+      if (self || !msg.startsWith("!")) return;
 
       const displayName = context["display-name"];
       const message = msg.trim();
@@ -62,7 +62,7 @@ export default function Layout() {
         message: string[];
         function: Record<string, () => any>;
       }
-
+      //todo: fix the countdown from overlapping
       const commands: Commands = {
         message: ["!dice", "!drop", "!timer"],
         function: {
@@ -80,34 +80,39 @@ export default function Layout() {
             const target = new Date(
               Date.now() + (minutes * 60 + seconds) * 1000
             );
-            const interval = setInterval(() => {
-              const totalMS = target.getTime() - Date.now();
+            let lastTS = 0;
+
+            const repeatable = () => {
+              const newTS = Date.now();
+              const totalMS = target.getTime() - newTS;
               const totalSS = totalMS / 1000;
               const totalMM = totalSS / 60;
-              if (totalMS <= 0) {
-                clearInterval(interval);
-                setCountdown(
-                  `timer expired @ ${new Date().toLocaleTimeString()}`
-                );
-              } else {
-                setCountdown(
-                  `${Math.floor(totalMM) % 60}:${(
-                    Math.floor(totalSS) % 60
-                  ).toLocaleString("en-US", {
-                    minimumIntegerDigits: 2,
-                    useGrouping: false,
-                  })}`
-                );
+              if (totalMS > 0) {
+                if (Math.floor(newTS / 1000) > Math.floor(lastTS / 1000)) {
+                  lastTS = newTS;
+                  setCountdown(
+                    `${Math.floor(totalMM % 60)}:${Math.floor(totalSS % 60)}`
+                  );
+                  // console.log(
+                  //   `Time remaining:${Math.floor(totalMM % 60)}:${Math.floor(
+                  //     totalSS % 60
+                  //   )}`
+                  // );
+                }
+                requestAnimationFrame(repeatable);
               }
-            }, 100);
+            };
+            requestAnimationFrame(repeatable);
             return "Be back in 5 minutes!";
           },
         },
       };
 
-      // todo: iterate through commands and compare against message string
-      // check for commands
-      if (commands.message.some((string) => message === string) && context.username === "ljtechdotca") {
+      // check for commands and streamer username
+      if (
+        commands.message.some((string) => message === string) &&
+        context.username === "ljtechdotca"
+      ) {
         console.log(`* Executed ${message} command`);
         const commandMessage = message.replace("!", "");
 
