@@ -17,9 +17,11 @@ export default function Layout() {
   const chatRef = useRef<HTMLUListElement>(null);
   const [dateTime, setDateTime] = useState({ date: "", time: "" });
   const [followers, setFollowers] = useState<number>(0);
-  const [countdown, setCountdown] = useState<string>();
+  // const [countdown, setCountdown] = useState<string>();
+  // const [frame, setFrame] = useState<number>(0);
 
-  // todo: bearer token is public lol woopsie
+  // todo: hide in env file?
+
   useEffect(() => {
     const fetchFollowerData = async () => {
       const followers = await fetch(
@@ -53,154 +55,125 @@ export default function Layout() {
       msg: string,
       self: boolean
     ) {
-      if (self || !msg.startsWith("!")) return;
+      // if (self || !msg.startsWith("!")) return;
 
       const displayName = context["display-name"];
+      const channel = target.replace("#", "");
+      const tags = context[channel];
       const message = msg.trim();
 
-      interface Commands {
-        message: string[];
-        function: Record<string, () => any>;
-      }
-      //todo: fix the countdown from overlapping
-      const commands: Commands = {
-        message: ["!dice", "!drop", "!timer"],
-        function: {
-          dice: function rollDice() {
-            const sides = 6;
-            return Math.floor(Math.random() * sides) + 1;
-          },
-          drop: function dropDude() {
-            return "!drop something parachute";
-          },
-          timer: function startCountdown(
-            minutes: number = 5,
-            seconds: number = 0
-          ) {
-            const target = new Date(
-              Date.now() + (minutes * 60 + seconds) * 1000
-            );
-            let lastTS = 0;
+      if (self) return;
 
-            const repeatable = () => {
-              const newTS = Date.now();
-              const totalMS = target.getTime() - newTS;
-              const totalSS = totalMS / 1000;
-              const totalMM = totalSS / 60;
-              if (totalMS > 0) {
-                if (Math.floor(newTS / 1000) > Math.floor(lastTS / 1000)) {
-                  lastTS = newTS;
-                  setCountdown(
-                    `${Math.floor(totalMM % 60)}:${Math.floor(totalSS % 60)}`
-                  );
-                  // console.log(
-                  //   `Time remaining:${Math.floor(totalMM % 60)}:${Math.floor(
-                  //     totalSS % 60
-                  //   )}`
-                  // );
-                }
-                requestAnimationFrame(repeatable);
-              }
-            };
-            requestAnimationFrame(repeatable);
-            return "Be back in 5 minutes!";
-          },
-        },
-      };
+      // if (message.startsWith("!")) {
+      //   // if (message === "!dice") {
+      //   // }
+      //   switch (message) {
+      //     case "!dice":
+      //       console.log("dice");
+      //       break;
+      //   }
+      // }
 
-      // check for commands and streamer username
-      if (
-        commands.message.some((string) => message === string) &&
-        context.username === "ljtechdotca"
-      ) {
-        console.log(`* Executed ${message} command`);
-        const commandMessage = message.replace("!", "");
+      const args = message.slice(1).split(" ");
+      const command = args.shift()?.toLowerCase();
 
-        const commandFunction = commands.function[commandMessage];
+      // if (command === "echo") {
+      //   client.say(channel, `@${tags.username}, you said: "${args.join(" ")}"`);
+      // }
 
-        if (typeof commandFunction() === "number") {
-          client.say(target, `${Math.floor(commandFunction())}`);
-        } else {
-          client.say(target, commandFunction());
-        }
-      } else {
-        const stringReplacements: Message[] = [];
-        if (context.emotes) {
-          Object.entries(context.emotes).forEach(([id, positions]) => {
-            const position = positions[0];
-            const [start, end] = position.split("-");
-            const stringToReplace = message.substring(
-              parseInt(start, 10),
-              parseInt(end, 10) + 1
-            );
+      // todo: old if check for commands in message
+      // if (
+      //   commands.message.some((string) => message === string) &&
+      //   context.username === "ljtechdotca"
+      // ) {
+      //   console.log(`* Executed ${message} command`);
+      //   const commandMessage = message.replace("!", "");
 
-            let imgSrc = `https://static-cdn.jtvnw.net/emoticons/v1/${id}/3.0`;
+      //   const commandFunction = commands.function[commandMessage];
 
-            let imgElement = document.createElement("img");
-            imgElement.classList.add("emoji");
-            imgElement.src = imgSrc;
-            imgElement.alt = stringToReplace;
-            imgElement.width = 28;
-            imgElement.height = 28;
+      //   if (typeof commandFunction() === "number") {
+      //     client.say(target, `${Math.floor(commandFunction())}`);
+      //   } else {
+      //     client.say(target, commandFunction());
+      //   }
+      // }
+      // milestone - chat log
+      const stringReplacements: Message[] = [];
+      if (context.emotes) {
+        Object.entries(context.emotes).forEach(([id, positions]) => {
+          const position = positions[0];
+          const [start, end] = position.split("-");
+          const stringToReplace = message.substring(
+            parseInt(start, 10),
+            parseInt(end, 10) + 1
+          );
 
-            stringReplacements.push({
-              text: stringToReplace,
-              src: imgSrc,
-              img: imgElement,
-            });
+          let imgSrc = `https://static-cdn.jtvnw.net/emoticons/v1/${id}/3.0`;
+
+          let imgElement = document.createElement("img");
+          imgElement.classList.add("emoji");
+          imgElement.src = imgSrc;
+          imgElement.alt = stringToReplace;
+          imgElement.width = 28;
+          imgElement.height = 28;
+
+          stringReplacements.push({
+            text: stringToReplace,
+            src: imgSrc,
+            img: imgElement,
           });
-        }
-
-        let splitArray: Array<any> = message.split(" ");
-
-        for (let i = 0; i < splitArray.length; i++) {
-          if (
-            stringReplacements.some(
-              (messageObject) => messageObject.text === splitArray[i]
-            )
-          ) {
-            splitArray[i] = stringReplacements.find(
-              (stringReplacement) => stringReplacement.text === splitArray[i]
-            )?.img as HTMLImageElement;
-          } else if (i !== splitArray.length - 1) {
-            splitArray[i] = document.createTextNode(
-              (splitArray[i] as string) + " "
-            );
-          } else {
-            splitArray[i] = document.createTextNode(splitArray[i] as string);
-          }
-        }
-
-        let messageArray: Array<any> = splitArray;
-        let chat = chatRef.current as HTMLUListElement;
-        let chatItem = document.createElement("li");
-        let chatUser = document.createElement("span");
-        let chatContent = document.createElement("span");
-
-        messageArray.forEach((word) => chatContent.appendChild(word));
-        chatItem.classList.add("message");
-
-        chatUser.appendChild(document.createTextNode(displayName + ": "));
-        chatUser.classList.add("name");
-        if (context.color) {
-          chatUser.style.color = context.color as string;
-        } else {
-          chatUser.classList.add("rainbow");
-        }
-
-        chatContent.classList.add("content");
-
-        chatItem.appendChild(chatUser);
-        chatItem.appendChild(chatContent);
-        chat.appendChild(chatItem);
-        if (chat.childNodes.length > 10) {
-          chat.childNodes[0].remove();
-        }
-        chatItem.scrollIntoView({ behavior: "smooth", block: "end" });
+        });
       }
+
+      let splitArray: Array<any> = message.split(" ");
+
+      for (let i = 0; i < splitArray.length; i++) {
+        if (
+          stringReplacements.some(
+            (messageObject) => messageObject.text === splitArray[i]
+          )
+        ) {
+          splitArray[i] = stringReplacements.find(
+            (stringReplacement) => stringReplacement.text === splitArray[i]
+          )?.img as HTMLImageElement;
+        } else if (i !== splitArray.length - 1) {
+          splitArray[i] = document.createTextNode(
+            (splitArray[i] as string) + " "
+          );
+        } else {
+          splitArray[i] = document.createTextNode(splitArray[i] as string);
+        }
+      }
+
+      let messageArray: Array<any> = splitArray;
+      let chat = chatRef.current as HTMLUListElement;
+      let chatItem = document.createElement("li");
+      let chatUser = document.createElement("span");
+      let chatContent = document.createElement("span");
+
+      messageArray.forEach((word) => chatContent.appendChild(word));
+      chatItem.classList.add("message");
+
+      chatUser.appendChild(document.createTextNode(displayName + ": "));
+      chatUser.classList.add("name");
+      if (context.color) {
+        chatUser.style.color = context.color as string;
+      } else {
+        chatUser.classList.add("rainbow");
+      }
+
+      chatContent.classList.add("content");
+
+      chatItem.appendChild(chatUser);
+      chatItem.appendChild(chatContent);
+      chat.appendChild(chatItem);
+      if (chat.childNodes.length > 10) {
+        chat.childNodes[0].remove();
+      }
+      chatItem.scrollIntoView({ behavior: "smooth", block: "end" });
     }
 
-    // render the date time
+    // milestone - render the date time
     function renderDateTime(now: number) {
       setDateTime({
         date: new Date().toLocaleDateString(),
@@ -223,7 +196,8 @@ export default function Layout() {
       </Head>
       <div className={styles.container}>
         <ul className={styles.chat} ref={chatRef}></ul>
-        <div className={styles.countdown}>{countdown}</div>
+        {/* // todo: countdown timer */}
+        {/* <div className={styles.countdown}>{countdown}</div> */}
         <footer className={styles.footer}>
           <div className={styles.root}>
             <div className={styles.flex}>
