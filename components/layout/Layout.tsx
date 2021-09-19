@@ -17,6 +17,7 @@ export default function Layout() {
   const chatRef = useRef<HTMLUListElement>(null);
   const [dateTime, setDateTime] = useState({ date: "", time: "" });
   const [followers, setFollowers] = useState<number>(0);
+  const [countdown, setCountdown] = useState<string>();
 
   // todo: bearer token is public lol woopsie
   useEffect(() => {
@@ -52,18 +53,71 @@ export default function Layout() {
       msg: string,
       self: boolean
     ) {
-      if (self) {
-        return null;
-      }
+      console.log(target, context, msg, self);
 
       const displayName = context["display-name"];
       const message = msg.trim();
 
-      // commands
-      if (message === "!dice") {
-        const num = rollDice();
-        client.say(target, `${Math.floor(num)}`);
+      interface Commands {
+        message: string[];
+        function: Record<string, () => any>;
+      }
+
+      const commands: Commands = {
+        message: ["!dice", "!drop", "!timer"],
+        function: {
+          dice: function rollDice() {
+            const sides = 6;
+            return Math.floor(Math.random() * sides) + 1;
+          },
+          drop: function dropDude() {
+            return "!drop something parachute";
+          },
+          timer: function startCountdown(
+            minutes: number = 5,
+            seconds: number = 0
+          ) {
+            const target = new Date(
+              Date.now() + (minutes * 60 + seconds) * 1000
+            );
+            const interval = setInterval(() => {
+              const totalMS = target.getTime() - Date.now();
+              const totalSS = totalMS / 1000;
+              const totalMM = totalSS / 60;
+              if (totalMS <= 0) {
+                clearInterval(interval);
+                setCountdown(
+                  `timer expired @ ${new Date().toLocaleTimeString()}`
+                );
+              } else {
+                setCountdown(
+                  `${Math.floor(totalMM) % 60}:${(
+                    Math.floor(totalSS) % 60
+                  ).toLocaleString("en-US", {
+                    minimumIntegerDigits: 2,
+                    useGrouping: false,
+                  })}`
+                );
+              }
+            }, 100);
+            return "Be back in 5 minutes!";
+          },
+        },
+      };
+
+      // todo: iterate through commands and compare against message string
+      // check for commands
+      if (commands.message.some((string) => message === string) && context.username === "ljtechdotca") {
         console.log(`* Executed ${message} command`);
+        const commandMessage = message.replace("!", "");
+
+        const commandFunction = commands.function[commandMessage];
+
+        if (typeof commandFunction() === "number") {
+          client.say(target, `${Math.floor(commandFunction())}`);
+        } else {
+          client.say(target, commandFunction());
+        }
       } else {
         const stringReplacements: Message[] = [];
         if (context.emotes) {
@@ -141,13 +195,7 @@ export default function Layout() {
       }
     }
 
-    // todo: create some more commands
-    function rollDice() {
-      const sides = 6;
-      return Math.floor(Math.random() * sides) + 1;
-    }
-
-    // bottom left date and time
+    // render the date time
     function renderDateTime(now: number) {
       setDateTime({
         date: new Date().toLocaleDateString(),
@@ -170,6 +218,7 @@ export default function Layout() {
       </Head>
       <div className={styles.container}>
         <ul className={styles.chat} ref={chatRef}></ul>
+        <div className={styles.countdown}>{countdown}</div>
         <footer className={styles.footer}>
           <div className={styles.root}>
             <div className={styles.flex}>
