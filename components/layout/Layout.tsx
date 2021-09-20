@@ -186,7 +186,7 @@ export default function Layout() {
   }, []);
 
   return (
-    <>
+    <div className={styles.root}>
       <Head>
         <title>ljtechdotca</title>
         <meta
@@ -200,7 +200,7 @@ export default function Layout() {
         {/* // todo: countdown timer */}
         {/* <div className={styles.countdown}>{countdown}</div> */}
         <footer className={styles.footer}>
-          <div className={styles.root}>
+          <div className={styles.content}>
             <div className={styles.flex}>
               <a className={styles.logo} href="https://ljtech.ca">
                 <span className={styles.image}>
@@ -231,6 +231,6 @@ export default function Layout() {
           </div>
         </footer>
       </div>
-    </>
+    </div>
   );
 }
