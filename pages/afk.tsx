@@ -5,9 +5,6 @@ import styles from "../styles/Center.module.scss";
 export default function Afk() {
   return (
     <div className={styles.root}>
-      <div className={styles.index}>
-        <Layout />
-      </div>
       <div className={styles.base}>
         <div className={styles.grid}>
           <h1 className={styles.title}>

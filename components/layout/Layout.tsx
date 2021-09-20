@@ -29,7 +29,8 @@ export default function Layout() {
         {
           method: "GET",
           headers: {
-            Authorization: "Bearer 09qsq8nliw5kq12eneni72vicahtlg",
+            // todo: is this the supa secret part?
+            Authorization: "Bearer ym8drkj150s2f52gdy0h6qqoukper4",
             "Client-Id": "sxj0zfm4ts94sit4qp9380grqcqrwt",
           },
         }
