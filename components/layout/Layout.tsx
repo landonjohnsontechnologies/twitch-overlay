@@ -17,11 +17,9 @@ export default function Layout() {
   const chatRef = useRef<HTMLUListElement>(null);
   const [dateTime, setDateTime] = useState({ date: "", time: "" });
   const [followers, setFollowers] = useState<number>(0);
-  // const [countdown, setCountdown] = useState<string>();
-  // const [frame, setFrame] = useState<number>(0);
+  const [countdown, setCountdown] = useState<string>("");
 
   // todo: hide in env file?
-
   useEffect(() => {
     const fetchFollowerData = async () => {
       const followers = await fetch(
@@ -56,48 +54,69 @@ export default function Layout() {
       msg: string,
       self: boolean
     ) {
-      // if (self || !msg.startsWith("!")) return;
-
       const displayName = context["display-name"];
       const channel = target.replace("#", "");
       const tags = context[channel];
       const message = msg.trim();
+      const args = message.slice(1).split(" ");
+      const command = args.shift()?.toLowerCase();
+      const parameter = parseInt(args[0]);
+
+      console.log({
+        displayName: displayName,
+        channel: channel,
+        tags: tags,
+        message: message,
+        args: args,
+        command: command,
+      });
 
       if (self) return;
 
-      // if (message.startsWith("!")) {
-      //   // if (message === "!dice") {
-      //   // }
-      //   switch (message) {
-      //     case "!dice":
-      //       console.log("dice");
-      //       break;
-      //   }
-      // }
+      function rollDice() {
+        const max = args.length >= 1 ? parameter : 6;
+        return Math.floor(Math.random() * max) + 1;
+      }
 
-      const args = message.slice(1).split(" ");
-      const command = args.shift()?.toLowerCase();
+      function clearCountdown() {
+        setCountdown("");
+      }
 
-      // if (command === "echo") {
-      //   client.say(channel, `@${tags.username}, you said: "${args.join(" ")}"`);
-      // }
+      function startCountdown() {
+        const milliseconds = parameter ? parameter * 60000 : 300000;
+        const target = new Date(Date.now() + milliseconds).toLocaleTimeString();
+        setCountdown(target);
+        return target;
+      }
 
-      // todo: old if check for commands in message
-      // if (
-      //   commands.message.some((string) => message === string) &&
-      //   context.username === "ljtechdotca"
-      // ) {
-      //   console.log(`* Executed ${message} command`);
-      //   const commandMessage = message.replace("!", "");
+      if (message.startsWith("!")) {
+        if (displayName === "ljtechdotca") {
+          switch (command) {
+            case "dice":
+              client.say(channel, `${rollDice()}`);
+              break;
+            case "drop":
+              client.say(channel, "!drop something parachute");
+            //todo: timer with args
+            case "clear":
+              clearCountdown();
+              client.say(channel, "Timers cleared I think");
+            case "timer":
+              startCountdown();
+              client.say(
+                channel,
+                `ljtechdotca will be back @ ${startCountdown()} everyone take a break!`
+              );
+          }
+        } else {
+          switch (command) {
+            case "dice":
+              client.say(channel, `${rollDice()}`);
+              break;
+          }
+        }
+      }
 
-      //   const commandFunction = commands.function[commandMessage];
-
-      //   if (typeof commandFunction() === "number") {
-      //     client.say(target, `${Math.floor(commandFunction())}`);
-      //   } else {
-      //     client.say(target, commandFunction());
-      //   }
-      // }
       // milestone - chat log
       const stringReplacements: Message[] = [];
       if (context.emotes) {
@@ -109,7 +128,7 @@ export default function Layout() {
             parseInt(end, 10) + 1
           );
 
-          let imgSrc = `https://static-cdn.jtvnw.net/emoticons/v1/${id}/3.0`;
+          let imgSrc = `https://static-cdn.jtvnw.net/emoticons/v2/${id}/default/dark/1.0`;
 
           let imgElement = document.createElement("img");
           imgElement.classList.add("emoji");
@@ -173,13 +192,18 @@ export default function Layout() {
       }
       chatItem.scrollIntoView({ behavior: "smooth", block: "end" });
     }
+  }, []);
 
+  useEffect(() => {
     // milestone - render the date time
     function renderDateTime(now: number) {
       setDateTime({
         date: new Date().toLocaleDateString(),
         time: new Date().toLocaleTimeString(),
       });
+      if (new Date().toLocaleTimeString() === countdown) {
+        setCountdown("ended");
+      }
       requestAnimationFrame(renderDateTime);
     }
     requestAnimationFrame(renderDateTime);
@@ -198,7 +222,7 @@ export default function Layout() {
       <div className={styles.container}>
         <ul className={styles.chat} ref={chatRef}></ul>
         {/* // todo: countdown timer */}
-        {/* <div className={styles.countdown}>{countdown}</div> */}
+        <div className={styles.countdown}>{countdown}</div>
         <footer className={styles.footer}>
           <div className={styles.content}>
             <div className={styles.flex}>
