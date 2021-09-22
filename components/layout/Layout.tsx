@@ -78,10 +78,6 @@ export default function Layout() {
         return Math.floor(Math.random() * max) + 1;
       }
 
-      function clearCountdown() {
-        setCountdown("");
-      }
-
       function startCountdown() {
         const milliseconds = parameter ? parameter * 60000 : 300000;
         const target = new Date(Date.now() + milliseconds).toLocaleTimeString();
@@ -92,26 +88,29 @@ export default function Layout() {
       if (message.startsWith("!")) {
         if (displayName === "ljtechdotca") {
           switch (command) {
-            case "dice":
-              client.say(channel, `${rollDice()}`);
-              break;
-            case "drop":
-              client.say(channel, "!drop something parachute");
-            //todo: timer with args
-            case "timer":
-              startCountdown();
-              client.say(
-                channel,
-                `ljtechdotca will be back @ ${startCountdown()} everyone take a break!`
-              );
-          }
-        } else {
-          switch (command) {
-            case "dice":
-              client.say(channel, `${rollDice()}`);
-              break;
+            default:
+              console.log(command);
+            // case "dice":
+            //   client.say(channel, `${rollDice()}`);
+            //   break;
+            // case "drop":
+            //   client.say(channel, "!drop something parachute");
+            // //todo: timer with args
+            // case "timer":
+            //   startCountdown();
+            // client.say(
+            //   channel,
+            //   `ljtechdotca will be back @ ${startCountdown()} everyone take a break!`
+            // );
           }
         }
+        //  else {
+        //   switch (command) {
+        //     case "dice":
+        //       client.say(channel, `${rollDice()}`);
+        //       break;
+        //   }
+        // }
       }
 
       // milestone - chat log
@@ -194,14 +193,16 @@ export default function Layout() {
   useEffect(() => {
     // milestone - render the date time
     function renderDateTime(now: number) {
+      const currentTime = new Date().toLocaleTimeString();
       setDateTime({
         date: new Date().toLocaleDateString(),
-        time: new Date().toLocaleTimeString(),
+        time: currentTime,
       });
-      if (new Date().toLocaleTimeString() === countdown) {
-        setCountdown("ended");
-      }
       requestAnimationFrame(renderDateTime);
+      if (countdown === currentTime) {
+        console.log("hello world");
+      }
+      // console.log(now);
     }
     requestAnimationFrame(renderDateTime);
   }, []);
