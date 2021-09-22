@@ -98,9 +98,6 @@ export default function Layout() {
             case "drop":
               client.say(channel, "!drop something parachute");
             //todo: timer with args
-            case "clear":
-              clearCountdown();
-              client.say(channel, "Timers cleared I think");
             case "timer":
               startCountdown();
               client.say(
