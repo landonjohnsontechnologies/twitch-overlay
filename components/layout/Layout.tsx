@@ -17,9 +17,8 @@ export default function Layout() {
   const chatRef = useRef<HTMLUListElement>(null);
   const [dateTime, setDateTime] = useState({ date: "", time: "" });
   const [followers, setFollowers] = useState<number>(0);
-  const [countdown, setCountdown] = useState<string>("");
+  // const [countdown, setCountdown] = useState<string>("");
 
-  // todo: hide in env file?
   useEffect(() => {
     const fetchFollowerData = async () => {
       const followers = await fetch(
@@ -27,9 +26,8 @@ export default function Layout() {
         {
           method: "GET",
           headers: {
-            // todo: is this the supa secret part?
-            Authorization: "Bearer ym8drkj150s2f52gdy0h6qqoukper4",
-            "Client-Id": "sxj0zfm4ts94sit4qp9380grqcqrwt",
+            Authorization: `Bearer ${process.env.TOKEN}`,
+            "Client-Id": `${process.env.CLIENT}`,
           },
         }
       );
@@ -81,29 +79,30 @@ export default function Layout() {
       function startCountdown() {
         const milliseconds = parameter ? parameter * 60000 : 300000;
         const target = new Date(Date.now() + milliseconds).toLocaleTimeString();
+        console.log(target);
         setCountdown(target);
         return target;
       }
 
       if (message.startsWith("!")) {
+        // todo : fix duplicate commands between streamer and public
+        // milestone : streamer only commands
         if (displayName === "ljtechdotca") {
           switch (command) {
-            default:
-              console.log(command);
+            //todo : timer command
+            case "timer":
+              startCountdown();
+              client.say(channel, `${startCountdown()}`);
             // case "dice":
             //   client.say(channel, `${rollDice()}`);
             //   break;
             // case "drop":
             //   client.say(channel, "!drop something parachute");
-            // //todo: timer with args
-            // case "timer":
-            //   startCountdown();
-            // client.say(
-            //   channel,
-            //   `ljtechdotca will be back @ ${startCountdown()} everyone take a break!`
-            // );
+            default:
+              console.log(command);
           }
         }
+        // milestone : public commands
         //  else {
         //   switch (command) {
         //     case "dice":
@@ -113,7 +112,7 @@ export default function Layout() {
         // }
       }
 
-      // milestone - chat log
+      // milestone : chat log
       const stringReplacements: Message[] = [];
       if (context.emotes) {
         Object.entries(context.emotes).forEach(([id, positions]) => {
@@ -193,16 +192,11 @@ export default function Layout() {
   useEffect(() => {
     // milestone - render the date time
     function renderDateTime(now: number) {
-      const currentTime = new Date().toLocaleTimeString();
       setDateTime({
         date: new Date().toLocaleDateString(),
-        time: currentTime,
+        time: new Date().toLocaleTimeString(),
       });
       requestAnimationFrame(renderDateTime);
-      if (countdown === currentTime) {
-        console.log("hello world");
-      }
-      // console.log(now);
     }
     requestAnimationFrame(renderDateTime);
   }, []);
@@ -220,7 +214,7 @@ export default function Layout() {
       <div className={styles.container}>
         <ul className={styles.chat} ref={chatRef}></ul>
         {/* // todo: countdown timer */}
-        <div className={styles.countdown}>{countdown}</div>
+        {/* <div className={styles.countdown}>{countdown}</div> */}
         <footer className={styles.footer}>
           <div className={styles.content}>
             <div className={styles.flex}>
