@@ -12,38 +12,62 @@ interface Message {
   img: HTMLImageElement;
 }
 
+// todo : connect to follower count through getStaticProps, env variables are not avail outside this
+// export async function getStaticProps() {
+//   const db = await myDB.connect({
+//     host: process.env.DB_HOST,
+//     username: process.env.DB_USER,
+//     password: process.env.DB_PASS,
+// ex: process.env.APP_ACCESS_TOKEN
+// ex: process.env.CLIENT_ID
+// ex: process.env.USERNAME
+// ex: process.env.OAUTH_TOKEN
+//   })
+//   // ...
+// }
+
 export default function Layout() {
   const opts = {
     identity: {
-      username: "ljtechbot",
-      password: `oauth:${process.env.AUTH_PASSWORD}`,
+      username: `${process.env.BOT_USERNAME}`,
+      password: `${process.env.OAUTH_TOKEN}`,
     },
     channels: ["ljtechdotca"],
   };
   const chatRef = useRef<HTMLUListElement>(null);
   const [dateTime, setDateTime] = useState({ date: "", time: "" });
-  const [followers, setFollowers] = useState<number>(0);
+  // const [followers, setFollowers] = useState<number>(0);
   // const [countdown, setCountdown] = useState<string>("");
 
   useEffect(() => {
-    const fetchFollowerData = async () => {
-      const followers = await fetch(
-        `https://api.twitch.tv/helix/users/follows?to_id=605732264`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${process.env.TOKEN}`,
-            "Client-Id": `${process.env.CLIENT}`,
-          },
-        }
-      );
-      const followersData = await followers.json();
-      setFollowers(followersData.total);
-    };
+    async () => {};
+  }, []);
+  useEffect(() => {
+    // const fetchFollowerData = async () => {
+    //   const followers = await fetch(
+    //     `https://api.twitch.tv/helix/users/follows?to_id=605732264`,
+    //     {
+    //       method: "GET",
+    //       headers: {
+    //         Authorization: `Bearer ${process.env.APP_ACCESS_TOKEN}`,
+    //         "Client-Id": `${process.env.CLIENT_ID}`,
+    //       },
+    //     }
+    //   );
+    //   const followersData = await followers.json();
+    //   setFollowers(followersData.total);
+    // };
 
-    fetchFollowerData();
+    // fetchFollowerData();
 
-    const client = new tmi.client(opts);
+    // todo : this {opts} object needs to be hidden from public?
+    const client = new tmi.client({
+      identity: {
+        username: `ljtechbot`,
+        password: `oauth:tq42okwzeglha4il02fid8mgd0dkyg`,
+      },
+      channels: ["ljtechdotca"],
+    });
     client.connect();
 
     client.on("connected", onConnectedHandler);
@@ -90,33 +114,33 @@ export default function Layout() {
       //   return target;
       // }
 
-      if (message.startsWith("!")) {
-        // todo : fix duplicate commands between streamer and public
-        // milestone : streamer only commands
-        if (displayName === "ljtechdotca") {
-          switch (command) {
-            //todo : timer command
-            // case "timer":
-            //   startCountdown();
-            //   client.say(channel, `${startCountdown()}`);
-            // case "dice":
-            //   client.say(channel, `${rollDice()}`);
-            //   break;
-            // case "drop":
-            //   client.say(channel, "!drop something parachute");
-            default:
-              console.log(command);
-          }
-        }
-        // milestone : public commands
-        //  else {
-        //   switch (command) {
-        //     case "dice":
-        //       client.say(channel, `${rollDice()}`);
-        //       break;
-        //   }
-        // }
-      }
+      // if (message.startsWith("!")) {
+      // todo : fix duplicate commands between streamer and public
+      // milestone : streamer only commands
+      // if (displayName === "ljtechdotca") {
+      //   switch (command) {
+      //todo : timer command
+      // case "timer":
+      //   startCountdown();
+      //   client.say(channel, `${startCountdown()}`);
+      // case "dice":
+      //   client.say(channel, `${rollDice()}`);
+      //   break;
+      // case "drop":
+      //   client.say(channel, "!drop something parachute");
+      //     default:
+      //       console.log(command);
+      //   }
+      // }
+      // milestone : public commands
+      //  else {
+      //   switch (command) {
+      //     case "dice":
+      //       client.say(channel, `${rollDice()}`);
+      //       break;
+      //   }
+      // }
+      // }
 
       // milestone : chat log
       const stringReplacements: Message[] = [];
@@ -235,7 +259,7 @@ export default function Layout() {
                 <div className={styles.date}>{dateTime.date}</div>
               </div>
             </div>
-            <div className={styles.end}>
+            {/* <div className={styles.end}>
               <div>follower goal:</div>
               <div className={styles.progress}>
                 <div
@@ -249,7 +273,7 @@ export default function Layout() {
                 <div className={styles.empty}></div>
               </div>
               <div>{Math.ceil(followers / 100) * 100}</div>
-            </div>
+            </div> */}
           </div>
         </footer>
       </div>
