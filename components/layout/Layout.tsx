@@ -2,7 +2,6 @@ import Head from "next/head";
 import Image from "next/image";
 import React, { useEffect, useRef, useState } from "react";
 import { CommonUserstate } from "tmi.js";
-import { opts } from "../../lib/data.js";
 import styles from "./Layout.module.scss";
 
 const tmi = require("tmi.js");
@@ -14,6 +13,13 @@ interface Message {
 }
 
 export default function Layout() {
+  const opts = {
+    identity: {
+      username: "ljtechbot",
+      password: `oauth:${process.env.AUTH_PASSWORD}`,
+    },
+    channels: ["ljtechdotca"],
+  };
   const chatRef = useRef<HTMLUListElement>(null);
   const [dateTime, setDateTime] = useState({ date: "", time: "" });
   const [followers, setFollowers] = useState<number>(0);
