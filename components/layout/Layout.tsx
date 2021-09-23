@@ -71,18 +71,18 @@ export default function Layout() {
 
       if (self) return;
 
-      function rollDice() {
-        const max = args.length >= 1 ? parameter : 6;
-        return Math.floor(Math.random() * max) + 1;
-      }
+      // function rollDice() {
+      //   const max = args.length >= 1 ? parameter : 6;
+      //   return Math.floor(Math.random() * max) + 1;
+      // }
 
-      function startCountdown() {
-        const milliseconds = parameter ? parameter * 60000 : 300000;
-        const target = new Date(Date.now() + milliseconds).toLocaleTimeString();
-        console.log(target);
-        setCountdown(target);
-        return target;
-      }
+      // function startCountdown() {
+      //   const milliseconds = parameter ? parameter * 60000 : 300000;
+      //   const target = new Date(Date.now() + milliseconds).toLocaleTimeString();
+      //   console.log(target);
+      //   setCountdown(target);
+      //   return target;
+      // }
 
       if (message.startsWith("!")) {
         // todo : fix duplicate commands between streamer and public
@@ -90,9 +90,9 @@ export default function Layout() {
         if (displayName === "ljtechdotca") {
           switch (command) {
             //todo : timer command
-            case "timer":
-              startCountdown();
-              client.say(channel, `${startCountdown()}`);
+            // case "timer":
+            //   startCountdown();
+            //   client.say(channel, `${startCountdown()}`);
             // case "dice":
             //   client.say(channel, `${rollDice()}`);
             //   break;
